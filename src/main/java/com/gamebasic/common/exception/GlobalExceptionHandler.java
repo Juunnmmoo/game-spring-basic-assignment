@@ -4,6 +4,7 @@ import com.gamebasic.common.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -41,6 +42,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})
     public ResponseEntity<ErrorResponse> handleUnreadable(Exception e, HttpServletRequest request) {
         return respond(HttpStatus.BAD_REQUEST, "요청 본문이나 파라미터 형식이 올바르지 않습니다.", request);
+    }
+
+
+
+    @ExceptionHandler(GameNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleGameNotFound(GameNotFoundException e, HttpServletRequest request) {
+        return respond(HttpStatus.NOT_FOUND, e.getMessage(), request);
+    }
+
+    @ExceptionHandler(GameFinishedException.class)
+    public ResponseEntity<ErrorResponse> handleGameFinised(GameFinishedException e, HttpServletRequest request)
+    {
+        return respond(HttpStatus.CONFLICT, e.getMessage(), request);
     }
 
     private ResponseEntity<ErrorResponse> respond(HttpStatus status, String message, HttpServletRequest request) {
