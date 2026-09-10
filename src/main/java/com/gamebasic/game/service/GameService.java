@@ -1,15 +1,13 @@
 package com.gamebasic.game.service;
 
-import com.gamebasic.game.dto.CreateRequest;
-import com.gamebasic.game.dto.GameDetailResponse;
-import com.gamebasic.game.dto.GameSummaryResponse;
-import com.gamebasic.game.dto.ProgressRequest;
+import com.gamebasic.game.dto.*;
 import com.gamebasic.game.entity.Game;
 import com.gamebasic.game.repository.GameRepository;
 import com.gamebasic.runcard.dto.CardResponse;
 import com.gamebasic.runcard.dto.RunCardRequest;
 import com.gamebasic.runcard.entity.RunCard;
 import com.gamebasic.runcard.repository.RunCardRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -134,7 +132,28 @@ public class GameService {
 
     }
 
-
     // TODO (Lv 8): 플레이어 이름 변경 — 변경 감지로 수정
+    @Transactional
+    public void renameGame(Long gameId, @Valid RenameRequest request) {
+        Game game = gameRepository.findById(gameId).orElseThrow(
+                () -> new IllegalStateException("게임을 찾을 수 없습니다")
+        );
+
+        game.rename(request.getPlayerName());
+    }
+
     // TODO (Lv 8): 게임 삭제
+    @Transactional
+    public void deleteGame(Long gameId) {
+
+        Game game = gameRepository.findById(gameId).orElseThrow(
+                () -> new IllegalStateException("게임을 찾을 수 없습니다")
+        );
+
+        List<RunCard> cards = runCardRepository.findAllByGameOrderByIdAsc(game);
+        runCardRepository.deleteAll(cards);
+        gameRepository.delete(game);
+    }
+
+
 }
