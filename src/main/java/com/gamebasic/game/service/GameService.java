@@ -6,6 +6,7 @@ import com.gamebasic.game.dto.*;
 import com.gamebasic.game.entity.Game;
 import com.gamebasic.game.repository.GameRepository;
 import com.gamebasic.runcard.dto.CardResponse;
+import com.gamebasic.runcard.dto.DeckCount;
 import com.gamebasic.runcard.dto.RunCardRequest;
 import com.gamebasic.runcard.entity.RunCard;
 import com.gamebasic.runcard.repository.RunCardRepository;
@@ -20,6 +21,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -107,6 +110,11 @@ public class GameService {
 
         List<Game> gamse = new ArrayList<>(gameRepository.findAll());
 
+        List<DeckCount> deckCountList = runCardRepository.countByGames(gamse);
+
+        Map<Long ,Long> deckSizeMap = deckCountList.stream()
+                .collect(Collectors.toMap(DeckCount::getGameId, DeckCount::getCardCount));
+
         return gamse.stream()
                 .map(game -> new GameSummaryResponse(
                         game.getId(),
@@ -114,7 +122,11 @@ public class GameService {
                         game.getCurrentHp(),
                         game.getCurrentFloor(),
                         game.getPhase(),
-                        game.getStatus()
+                        game.getStatus(),
+                        deckSizeMap.getOrDefault(game.getId(), 0L).intValue(),
+                        //runCardRepository.findAllByGameOrderByIdAsc(game).size(),
+                        game.getCreatedAt(),
+                        game.getUpdatedAt()
                 )).sorted(Comparator.comparing(GameSummaryResponse::getId).reversed())
                 .toList();
     }
