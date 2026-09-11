@@ -1,5 +1,7 @@
 package com.gamebasic.game.controller;
 
+import com.gamebasic.Ranking.Service.RankingService;
+import com.gamebasic.Ranking.dto.RankingResponse;
 import com.gamebasic.game.dto.*;
 import com.gamebasic.game.service.GameService;
 import jakarta.validation.Valid;
@@ -17,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GameController {
     private final GameService gameService;
+    private final RankingService rankingService;
 
 
 
@@ -63,5 +66,10 @@ public class GameController {
     {
         gameService.deleteGame(gameId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/rankings")
+    public ResponseEntity<RankingResponse> getRankings() {
+        return ResponseEntity.ok(rankingService.getRankings());
     }
 }
